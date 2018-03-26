@@ -1,3 +1,9 @@
 # HKUST COMP3111 Software Engineering (Spring 2018)
 
-This is modified README for the dev-peter branch
+Team Name: Cup of Java
+
+Team Members:
+
+CHANG Yingshan (ychangad) Team Leader
+MENG Zihan (amengaa) 
+Kang Yanming (ykangaf)
