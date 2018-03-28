@@ -1,6 +1,7 @@
 package ui.comp3111;
 
 import core.comp3111.DataColumn;
+
 import core.comp3111.DataTable;
 import core.comp3111.DataType;
 import core.comp3111.SampleDataGenerator;
@@ -18,7 +19,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
+import javafx.scene.chart.*;
+import ui.comp3111.MyPieChart;
 /**
  * The Main class of this GUI application
  * 
@@ -35,10 +37,11 @@ public class Main extends Application {
 	private DataTable sampleDataTable = null;
 
 	// Attributes: Scene and Stage
-	private static final int SCENE_NUM = 2;
+	private static final int SCENE_NUM = 3;
 	private static final int SCENE_MAIN_SCREEN = 0;
 	private static final int SCENE_LINE_CHART = 1;
-	private static final String[] SCENE_TITLES = { "COMP3111 Chart - [Team Name]", "Sample Line Chart Screen" };
+	private static final int SCENE_PIE_CHART = 2;
+	private static final String[] SCENE_TITLES = { "COMP3111 Chart - [Team Name]", "Sample Line Chart Screen", "Sample Pie Chart Screen"};
 	private Stage stage = null;
 	private Scene[] scenes = null;
 
@@ -48,6 +51,7 @@ public class Main extends Application {
 
 	// Screen 1: paneMainScreen
 	private Button btSampleLineChartData, btSampleLineChartDataV2, btSampleLineChart;
+	private Button btSamplePieChart;
 	private Label lbSampleDataTable, lbMainScreenTitle;
 
 	// Screen 2: paneSampleLineChartScreen
@@ -55,6 +59,7 @@ public class Main extends Application {
 	private NumberAxis xAxis = null;
 	private NumberAxis yAxis = null;
 	private Button btLineChartBackMain = null;
+	private Button btPieChartBackMain = null;
 
 	/**
 	 * create all scenes in this application
@@ -63,6 +68,7 @@ public class Main extends Application {
 		scenes = new Scene[SCENE_NUM];
 		scenes[SCENE_MAIN_SCREEN] = new Scene(paneMainScreen(), 400, 500);
 		scenes[SCENE_LINE_CHART] = new Scene(paneLineChartScreen(), 800, 600);
+		scenes[SCENE_PIE_CHART] = new Scene(panePieChartScreen(), 800, 600);
 		for (Scene s : scenes) {
 			if (s != null)
 				// Assumption: all scenes share the same stylesheet
@@ -78,6 +84,7 @@ public class Main extends Application {
 	private void initEventHandlers() {
 		initMainScreenHandlers();
 		initLineChartScreenHandlers();
+		initPieChartScreenHandlers();
 	}
 
 	/**
@@ -87,6 +94,14 @@ public class Main extends Application {
 
 		// click handler
 		btLineChartBackMain.setOnAction(e -> {
+			putSceneOnStage(SCENE_MAIN_SCREEN);
+		});
+	}
+	
+	private void initPieChartScreenHandlers() {
+
+		// click handler
+		btPieChartBackMain.setOnAction(e -> {
 			putSceneOnStage(SCENE_MAIN_SCREEN);
 		});
 	}
@@ -168,6 +183,10 @@ public class Main extends Application {
 		btSampleLineChart.setOnAction(e -> {
 			putSceneOnStage(SCENE_LINE_CHART);
 		});
+		
+		btSamplePieChart.setOnAction(e -> {
+			putSceneOnStage(SCENE_PIE_CHART);
+		});
 
 	}
 
@@ -201,6 +220,34 @@ public class Main extends Application {
 
 		return pane;
 	}
+	
+	private Pane panePieChartScreen() {
+
+		btPieChartBackMain = new Button("Back");
+		
+		String[] keys = {"apple", "banana", "pear", "lemon"};
+		DataColumn column1 = new DataColumn("String", keys);
+		Integer[] values = {10,20,30,40};
+		DataColumn column2 = new DataColumn("Integer", values);
+		
+		MyPieChart myPieChart = new MyPieChart(column1, column2);
+		PieChart pie = myPieChart.getPieChart();
+		Button animate = myPieChart.getAnimateButton();
+		animate.setOnAction(e-> {myPieChart.timeline.play();});
+		// Layout the UI components
+		VBox container = new VBox(20);
+		container.getChildren().addAll(pie, btPieChartBackMain, animate);
+		container.setAlignment(Pos.CENTER);
+
+		BorderPane pane = new BorderPane();
+		pane.setCenter(container);
+
+		// Apply CSS to style the GUI components
+		pane.getStyleClass().add("screen-background");
+
+		return pane;
+	}
+
 
 	/**
 	 * Creates the main screen and layout its UI components
@@ -213,6 +260,7 @@ public class Main extends Application {
 		btSampleLineChartData = new Button("Sample 1");
 		btSampleLineChartDataV2 = new Button("Sample 2");
 		btSampleLineChart = new Button("Sample Line Chart");
+		btSamplePieChart = new Button("Sample Pie Chart");
 		lbSampleDataTable = new Label("DataTable: empty");
 
 		// Layout the UI components
@@ -222,7 +270,7 @@ public class Main extends Application {
 		hc.getChildren().addAll(btSampleLineChartData, btSampleLineChartDataV2);
 
 		VBox container = new VBox(20);
-		container.getChildren().addAll(lbMainScreenTitle, hc, lbSampleDataTable, new Separator(), btSampleLineChart);
+		container.getChildren().addAll(lbMainScreenTitle, hc, lbSampleDataTable, new Separator(), btSampleLineChart, btSamplePieChart);
 		container.setAlignment(Pos.CENTER);
 
 		BorderPane pane = new BorderPane();
@@ -230,6 +278,7 @@ public class Main extends Application {
 
 		// Apply style to the GUI components
 		btSampleLineChart.getStyleClass().add("menu-button");
+		btSamplePieChart.getStyleClass().add("menu-button");
 		lbMainScreenTitle.getStyleClass().add("menu-title");
 		pane.getStyleClass().add("screen-background");
 
