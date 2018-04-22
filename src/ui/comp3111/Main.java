@@ -1,7 +1,6 @@
 package ui.comp3111;
 
 import core.comp3111.DataColumn;
-
 import core.comp3111.DataTable;
 import core.comp3111.DataType;
 import core.comp3111.SampleDataGenerator;
@@ -37,11 +36,12 @@ public class Main extends Application {
 	private DataTable sampleDataTable = null;
 
 	// Attributes: Scene and Stage
-	private static final int SCENE_NUM = 3;
+	private static final int SCENE_NUM = 4;
 	private static final int SCENE_MAIN_SCREEN = 0;
 	private static final int SCENE_LINE_CHART = 1;
 	private static final int SCENE_PIE_CHART = 2;
-	private static final String[] SCENE_TITLES = { "COMP3111 Chart - [Team Name]", "Sample Line Chart Screen", "Sample Pie Chart Screen"};
+	private static final int SCENE_SineWave_CHART = 3;
+	private static final String[] SCENE_TITLES = { "COMP3111 Chart - [Team Name]", "Sample Line Chart Screen", "Sample Pie Chart Screen", "Sine Wave"};
 	private Stage stage = null;
 	private Scene[] scenes = null;
 
@@ -51,15 +51,18 @@ public class Main extends Application {
 
 	// Screen 1: paneMainScreen
 	private Button btSampleLineChartData, btSampleLineChartDataV2, btSampleLineChart;
-	private Button btSamplePieChart;
+	private Button btSamplePieChart, btSineWave;
 	private Label lbSampleDataTable, lbMainScreenTitle;
 
 	// Screen 2: paneSampleLineChartScreen
-	private LineChart<Number, Number> lineChart = null;
+	private MyLineChart myLineChart = null;
+	private SineWave sine = null;
+	private LineChart lineChart = null;
 	private NumberAxis xAxis = null;
 	private NumberAxis yAxis = null;
 	private Button btLineChartBackMain = null;
 	private Button btPieChartBackMain = null;
+	private Button btSineWaveBackMain = null;
 
 	/**
 	 * create all scenes in this application
@@ -69,6 +72,7 @@ public class Main extends Application {
 		scenes[SCENE_MAIN_SCREEN] = new Scene(paneMainScreen(), 400, 500);
 		scenes[SCENE_LINE_CHART] = new Scene(paneLineChartScreen(), 800, 600);
 		scenes[SCENE_PIE_CHART] = new Scene(panePieChartScreen(), 800, 600);
+		scenes[SCENE_SineWave_CHART] = new Scene(paneSineWaveScreen(), 800, 600);
 		for (Scene s : scenes) {
 			if (s != null)
 				// Assumption: all scenes share the same stylesheet
@@ -85,6 +89,7 @@ public class Main extends Application {
 		initMainScreenHandlers();
 		initLineChartScreenHandlers();
 		initPieChartScreenHandlers();
+		initSineWaveScreenHandlers();
 	}
 
 	/**
@@ -105,6 +110,14 @@ public class Main extends Application {
 			putSceneOnStage(SCENE_MAIN_SCREEN);
 		});
 	}
+	
+	private void initSineWaveScreenHandlers() {
+
+		// click handler
+		btSineWaveBackMain.setOnAction(e -> {
+			putSceneOnStage(SCENE_MAIN_SCREEN);
+		});
+	}
 
 	/**
 	 * Populate sample data table values to the chart view
@@ -112,41 +125,15 @@ public class Main extends Application {
 	private void populateSampleDataTableValuesToChart(String seriesName) {
 
 		// Get 2 columns
-		DataColumn xCol = sampleDataTable.getCol("X");
-		DataColumn yCol = sampleDataTable.getCol("Y");
-
-		// Ensure both columns exist and the type is number
-		if (xCol != null && yCol != null && xCol.getTypeName().equals(DataType.TYPE_NUMBER)
-				&& yCol.getTypeName().equals(DataType.TYPE_NUMBER)) {
-
-			lineChart.setTitle("Sample Line Chart");
-			xAxis.setLabel("X");
-			yAxis.setLabel("Y");
-
-			// defining a series
-			XYChart.Series series = new XYChart.Series();
-
-			series.setName(seriesName);
-
-			// populating the series with data
-			// As we have checked the type, it is safe to downcast to Number[]
-			Number[] xValues = (Number[]) xCol.getData();
-			Number[] yValues = (Number[]) yCol.getData();
-
-			// In DataTable structure, both length must be the same
-			int len = xValues.length;
-
-			for (int i = 0; i < len; i++) {
-				series.getData().add(new XYChart.Data(xValues[i], yValues[i]));
-			}
-
-			// clear all previous series
-			lineChart.getData().clear();
-
-			// add the new series as the only one series for this line chart
-			lineChart.getData().add(series);
-
-		}
+		//DataColumn xCol = sampleDataTable.getCol("X");
+		//DataColumn yCol = sampleDataTable.getCol("Y");
+		Integer[] values1 = {10,20,30,40,45,55,60};
+		Integer[] values2 = {70,65,55,45,40,30,15};
+		DataColumn xCol = new DataColumn("xCol", values1);
+		DataColumn yCol = new DataColumn("yCol", values2);
+		myLineChart = new MyLineChart(xCol, yCol, seriesName);
+		lineChart = myLineChart.getLineChart();
+		
 
 	}
 
@@ -187,7 +174,10 @@ public class Main extends Application {
 		btSamplePieChart.setOnAction(e -> {
 			putSceneOnStage(SCENE_PIE_CHART);
 		});
-
+		
+		btSineWave.setOnAction(e -> {
+			putSceneOnStage(SCENE_SineWave_CHART);
+		});
 	}
 
 	/**
@@ -197,19 +187,24 @@ public class Main extends Application {
 	 */
 	private Pane paneLineChartScreen() {
 
-		xAxis = new NumberAxis();
-		yAxis = new NumberAxis();
-		lineChart = new LineChart<Number, Number>(xAxis, yAxis);
-
 		btLineChartBackMain = new Button("Back");
-
+		Integer[] values1 = {10,20,30,40,45,55,60};
+		Integer[] values2 = {70,65,55,45,40,30,15};
+		DataColumn xCol = new DataColumn("xCol", values1);
+		DataColumn yCol = new DataColumn("yCol", values2);
+		myLineChart = new MyLineChart(xCol, yCol, "to be specified");
+		lineChart = myLineChart.getLineChart();
+		
+		
+		Button animate = myLineChart.getAnimateButton();
+		Button stop = myLineChart.getStopButton();
+		/*lineChart.setTitle("Empty Line Chart");
 		xAxis.setLabel("undefined");
-		yAxis.setLabel("undefined");
-		lineChart.setTitle("An empty line chart");
-
+		yAxis.setLabel("undefined");*/
+		
 		// Layout the UI components
 		VBox container = new VBox(20);
-		container.getChildren().addAll(lineChart, btLineChartBackMain);
+		container.getChildren().addAll(lineChart, btLineChartBackMain, animate, stop);
 		container.setAlignment(Pos.CENTER);
 
 		BorderPane pane = new BorderPane();
@@ -225,18 +220,18 @@ public class Main extends Application {
 
 		btPieChartBackMain = new Button("Back");
 		
-		String[] keys = {"apple", "banana", "pear", "lemon"};
+		String[] keys = {"apple", "banana", "pear", "lemon", "orange", "peach", "berry", "mango"};
 		DataColumn column1 = new DataColumn("String", keys);
-		Integer[] values = {10,20,30,40};
+		Integer[] values = {10,10,10,10,15,15,15,15};
 		DataColumn column2 = new DataColumn("Integer", values);
 		
 		MyPieChart myPieChart = new MyPieChart(column1, column2);
 		PieChart pie = myPieChart.getPieChart();
 		Button animate = myPieChart.getAnimateButton();
-		animate.setOnAction(e-> {myPieChart.timeline.play();});
+		Button stop = myPieChart.getStopButton();
 		// Layout the UI components
 		VBox container = new VBox(20);
-		container.getChildren().addAll(pie, btPieChartBackMain, animate);
+		container.getChildren().addAll(pie, btPieChartBackMain, animate, stop);
 		container.setAlignment(Pos.CENTER);
 
 		BorderPane pane = new BorderPane();
@@ -248,6 +243,32 @@ public class Main extends Application {
 		return pane;
 	}
 
+	private Pane paneSineWaveScreen() {
+
+		btSineWaveBackMain = new Button("Back");
+		sine = new SineWave("name there?");
+		lineChart = sine.getLineChart();
+		
+		
+		Button animate = sine.getAnimateButton();
+		Button stop = sine.getStopButton();
+		/*lineChart.setTitle("Empty Line Chart");
+		xAxis.setLabel("undefined");
+		yAxis.setLabel("undefined");*/
+		
+		// Layout the UI components
+		VBox container = new VBox(20);
+		container.getChildren().addAll(lineChart, btLineChartBackMain, animate, stop);
+		container.setAlignment(Pos.CENTER);
+
+		BorderPane pane = new BorderPane();
+		pane.setCenter(container);
+
+		// Apply CSS to style the GUI components
+		pane.getStyleClass().add("screen-background");
+
+		return pane;
+	}
 
 	/**
 	 * Creates the main screen and layout its UI components
@@ -261,6 +282,7 @@ public class Main extends Application {
 		btSampleLineChartDataV2 = new Button("Sample 2");
 		btSampleLineChart = new Button("Sample Line Chart");
 		btSamplePieChart = new Button("Sample Pie Chart");
+		btSineWave = new Button("Sine Wave Line Chart");
 		lbSampleDataTable = new Label("DataTable: empty");
 
 		// Layout the UI components
@@ -270,7 +292,7 @@ public class Main extends Application {
 		hc.getChildren().addAll(btSampleLineChartData, btSampleLineChartDataV2);
 
 		VBox container = new VBox(20);
-		container.getChildren().addAll(lbMainScreenTitle, hc, lbSampleDataTable, new Separator(), btSampleLineChart, btSamplePieChart);
+		container.getChildren().addAll(lbMainScreenTitle, hc, lbSampleDataTable, new Separator(), btSampleLineChart, btSamplePieChart, btSineWave);
 		container.setAlignment(Pos.CENTER);
 
 		BorderPane pane = new BorderPane();
@@ -279,6 +301,7 @@ public class Main extends Application {
 		// Apply style to the GUI components
 		btSampleLineChart.getStyleClass().add("menu-button");
 		btSamplePieChart.getStyleClass().add("menu-button");
+		btSineWave.getStyleClass().add("menu-button");
 		lbMainScreenTitle.getStyleClass().add("menu-title");
 		pane.getStyleClass().add("screen-background");
 
